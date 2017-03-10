@@ -18,6 +18,8 @@ class SpheroManager:
     SPHERO_BASE_NAME = "Sphero-"
 
     def __init__(self):
+        # TODO: Let user set names of known spheros with config file
+        # rather than leaving this hard-coded list in place.
         self._name_cache = {"68:86:E7:02:3A:AE": "Sphero-RWO",
                             "68:86:E7:03:22:95": "Sphero-ORB",
                             "68:86:E7:03:24:54": "Sphero-YGY"}
