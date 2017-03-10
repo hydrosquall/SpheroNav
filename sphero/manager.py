@@ -20,16 +20,15 @@ class SpheroManager:
     def __init__(self):
         # TODO: Let user set names of known spheros with config file
         # rather than leaving this hard-coded list in place.
-        self._name_cache = {"68:86:E7:02:3A:AE": "Sphero-RWO",
-                            "68:86:E7:03:22:95": "Sphero-ORB",
-                            "68:86:E7:03:24:54": "Sphero-YGY"}
+        # To boost performance, specify a name cache after initializing
+        # An example is in hello_world_sphero.ipynb.
+        # detect with device.bt_addr
+        self._name_cache = {}
 
         self._spheros = {}
-
         self._sphero_lock = threading.RLock()
         self._run_auto_search = True
         self._search_thread = None
-
         self._sphero_found_cb = None
 
     def get_device_by_name(self, name):
@@ -130,6 +129,7 @@ class SpheroManager:
         :return: An available device or None if no device is available or nearby
         :rtype: SpheroAPI or None
         """
+        #TODO: manage all instances where number of spheros available is hardcoded
         for _ in xrange(2):
             for key in self._spheros:
                 sphero = self._spheros[key]
