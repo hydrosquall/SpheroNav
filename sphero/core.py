@@ -625,7 +625,11 @@ class SpheroAPI(object):
         return self._write(request.SetRawMotorValues(self.seq, left_mode, left_power, right_mode, right_power))
 
     def set_motion_timeout(self, timeout):
-        # TODO WRITE DOC
+        """"
+        Set duration over which robot 
+            
+        :param timeout: Duration of timeout in milliseconds
+        """
         return self._write(request.SetMotionTimeout(self.seq, timeout))
 
     def set_option_flags(self, stay_on=False, vector_drive=False, leveling=False, tail_led=False, motion_timeout=False,
