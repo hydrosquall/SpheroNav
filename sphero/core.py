@@ -129,7 +129,7 @@ class SpheroAPI(object):
         A Helper method for connecting the sphero. This is where the actual connection is executed
         """
         for _ in xrange(retries):
-            print "try {}".format(_)
+            print "{} try {}".format(self.bt_name, _)
             try:
                 self._bt_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
                 self._bt_socket.connect((self.bt_addr, 1))
