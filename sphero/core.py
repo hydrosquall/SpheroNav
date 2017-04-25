@@ -124,12 +124,12 @@ class SpheroAPI(object):
 
         return self._connect(retries)
 
-    def _connect(self, retries):
+    def _connect(self, retries, DELAY=1.0):
         """
         A Helper method for connecting the sphero. This is where the actual connection is executed
         """
         for _ in xrange(retries):
-            print "{} try {}".format(self.bt_name, _)
+            print "{} Try #{}".format(self.bt_name, _)
             try:
                 self._bt_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
                 self._bt_socket.connect((self.bt_addr, 1))
@@ -137,13 +137,20 @@ class SpheroAPI(object):
                 # If connection was established, start listening for incoming packages
                 self._start_receiver()
                 break
+
             except bluetooth.btcommon.BluetoothError:
-                print "Trying to connect again"
-                time.sleep(1.0)
+                print "Bluetooth error. Trying to connect again."
+                time.sleep(DELAY)
+
+            except IOError as ex:
+                print "IOError Occurred. Trying to connect again."
+                time.sleep(DELAY)
+
             except Exception as ex:
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 message = template.format(type(ex).__name__, ex.args)
                 print message
+                time.sleep(DELAY)
         else:
             self._connecting = False
             raise SpheroConnectionError('Failed to connect after %d retries. Is the device turned on?' % retries)
