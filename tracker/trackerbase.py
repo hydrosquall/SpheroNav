@@ -34,10 +34,10 @@ class TrackerBase(object):
     TRACK_TYPE_COLOR = 1
     TRACK_TYPE_DEPTH = 2
 
-    def __init__(self):
+    def __init__(self, cameraID=-1):
         self.track_type = None
 
-        self.cam = cv2.VideoCapture(-1)
+        self.cam = cv2.VideoCapture(cameraID)
 
         if not self.cam.isOpened():
             self.cam.open()
@@ -100,8 +100,8 @@ class ColorTracker(TrackerBase):
     Implements a simple color tracker. The color tracker is used to find positions of a single glowing
     object
     """
-    def __init__(self):
-        super(ColorTracker, self).__init__()
+    def __init__(self, cameraID=-1):
+        super(ColorTracker, self).__init__(cameraID)
         self._masks = None
 
         self.t1 = None
@@ -109,6 +109,24 @@ class ColorTracker(TrackerBase):
         # TESTING
         self.number_of_samples = 0
         self.avg_samples = [util.AvgValueSampleHolder(), util.AvgValueSampleHolder(), util.AvgValueSampleHolder(), util.AvgValueSampleHolder()]
+
+
+    def track_object(self, traceable_object_list):
+        '''
+            Similar to track_objects, but focuses purely on tracking 1 object
+            pass a list of 1 in order to be able to mutate things in-place.
+        '''
+        image = self.get_video_frame()
+        timestamp = time.time()
+        traceable_object_list[0].screen_size = self.image_size
+
+        x, y = self._find_traceable_in_image(image, traceable_object_list[0])
+
+        traceable_object_list[0].add_tracking(Vector2D(x, y), timestamp)
+
+        return traceable_object_list
+
+
 
     def track_objects(self, traceable_objects):
         image = self.get_video_frame()
@@ -119,7 +137,7 @@ class ColorTracker(TrackerBase):
             traceable_obj.screen_size = self.image_size
 
             # PREPARE FOR TRACKING
-            traceable_obj.do_before_tracked()
+            # traceable_obj.do_before_tracked()
 
             # DO TRACKING
             x, y = self._find_traceable_in_image(image, traceable_obj)
@@ -132,20 +150,25 @@ class ColorTracker(TrackerBase):
             traceable_obj.draw_graphics(image)
 
             # FINNISH TRACKING
-            traceable_obj.do_after_tracked()
+            # traceable_obj.do_after_tracked()
 
         t2 = time.time()
         if self.t1 is not None:
             fps = int(util.calc_fps(self.t1, t2))
         else:
             fps = 0
+
+        label_loc = "Point: ({},{})".format(x, y)
+        Ig.ImageGraphics.draw_text(image, label_loc, (400, 10), 0.5, util.Color((255, 255, 0)))
+
+
         label_fps = "Tracking/sec: {}".format(fps)
         Ig.ImageGraphics.draw_text(image, label_fps, (10, 10), 0.5, util.Color((255, 255, 0)))
 
         label_n_tracables = "Num objects: {}".format(len(traceable_objects))
         Ig.ImageGraphics.draw_text(image, label_n_tracables, (200, 10), 0.5, util.Color((255, 255, 0)))
 
-        self._draw_masks()
+        # self._draw_masks()
 
         # self.video_out.write(image)
 
@@ -155,10 +178,20 @@ class ColorTracker(TrackerBase):
         cv2.waitKey(1)
         return traceable_objects
 
-    def _find_traceable_in_image(self, image, traceable_obj):
+    def _find_traceable_in_image(self, image, traceable_obj, ADD_MASK=True):
+        '''
+            Looks for largest contour left after the color mask is applied
+
+            ADD_MASK adds mask for plotting, but can be avoided if 
+            aiming for peak tracking performance.
+        '''
         mask = traceable_obj.filter.get_mask(image)
-        mask = ImageHandler.noise_reduction(mask, erode=1, dilate=1, kernel_size=2)  # TODO Erode, dilate
-        self._add_mask(mask)
+        # mask = ImageHandler.noise_reduction(mask, erode=1, dilate=1, kernel_size=2)  
+        # # TODO Erode, dilate. Cameron- made to do medianblur only
+
+        if ADD_MASK:
+            self._add_mask(mask)
+
         x, y = self.find_largest_contour_in_image(mask)
         if y is not None:
             y = self.image_size[1] - y
@@ -167,6 +200,7 @@ class ColorTracker(TrackerBase):
     def _draw_masks(self):
         if self._masks is not None:
             cv2.imshow("All masks", self._masks)
+
             self._masks = None
 
     def _add_mask(self, mask):
@@ -201,8 +235,3 @@ if __name__ == "__main__":
     while True:
         traceable_object = tracker.track_objects(traceable_object)
         cv2.waitKey(5)
-
-
-
-
-
