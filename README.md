@@ -1,9 +1,11 @@
-#SPHERO NAV 
+# SPHERO NAV 
 A software library for controlling and tracking Orbotix Sphero
 
 The library was created for Simon Nistad's Master's Thesis at the University of Tromso - Norway
 
 It was forked by Cameron Yick for a senior robotics project at Yale University
+
+See [SpheroTeam](http://www.github.com/hydrosquall/SpheroTeam).
 
 [Demo video](https://www.youtube.com/watch?v=KlWZrcMtZzI)
 
@@ -14,7 +16,7 @@ http://munin.uit.no/handle/10037/6545
 
 Todo: Supply a requirements.txt
 
-- Python OpenCV 2 (and dependencies for open cv)
+- Python OpenCV 2.4 (and dependencies for open cv)
     http://docs.opencv.org/trunk/doc/py_tutorials/py_setup/py_table_of_contents_setup/py_table_of_contents_setup.html
 
 - PyBluez
